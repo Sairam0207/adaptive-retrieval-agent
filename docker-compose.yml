@@ -1,0 +1,17 @@
+# Optional: run Qdrant as a server instead of the default on-disk local mode.
+# Not required to run this project — src/config.py defaults to an embedded,
+# file-based Qdrant instance (QDRANT_PATH) so no Docker is needed at all.
+# Use this only if you want a persistent Qdrant server (e.g. to inspect data
+# via its web UI at http://localhost:6333/dashboard) and set QDRANT_URL
+# in .env to http://localhost:6333 to use it.
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+
+volumes:
+  qdrant_storage:

@@ -1,0 +1,182 @@
+[
+  {
+    "id": "q1",
+    "type": "easy",
+    "question": "How do you declare a path parameter with a type in FastAPI, and what happens if the client sends a value that doesn't match the declared type?",
+    "expected_facts": [
+      "path parameters are declared using Python type hints in the function signature",
+      "FastAPI validates the value and returns an HTTP 422 error if it doesn't match the type"
+    ]
+  },
+  {
+    "id": "q2",
+    "type": "easy",
+    "question": "How does FastAPI let you declare an optional query parameter?",
+    "expected_facts": [
+      "give the parameter a default value (e.g. None)",
+      "query parameters are inferred from function parameters not in the path"
+    ]
+  },
+  {
+    "id": "q3",
+    "type": "easy",
+    "question": "How do you declare a request body in FastAPI?",
+    "expected_facts": [
+      "define a Pydantic BaseModel",
+      "add it as a type-annotated parameter in the path operation function"
+    ]
+  },
+  {
+    "id": "q4",
+    "type": "easy",
+    "question": "How do you run a task after returning a response to the client, without making the client wait for it?",
+    "expected_facts": [
+      "use BackgroundTasks",
+      "add the task with add_task"
+    ]
+  },
+  {
+    "id": "q5",
+    "type": "easy",
+    "question": "At a high level, how does FastAPI's dependency injection system work?",
+    "expected_facts": [
+      "uses the Depends function/class",
+      "a dependency is a callable FastAPI calls before the path operation function"
+    ]
+  },
+  {
+    "id": "q6",
+    "type": "easy",
+    "question": "How do you add CORS support to a FastAPI application?",
+    "expected_facts": [
+      "add CORSMiddleware",
+      "configure allowed origins"
+    ]
+  },
+  {
+    "id": "q7",
+    "type": "easy",
+    "question": "How do you write tests for a FastAPI application?",
+    "expected_facts": [
+      "use TestClient from fastapi.testclient",
+      "TestClient is built on httpx"
+    ]
+  },
+  {
+    "id": "q8",
+    "type": "easy",
+    "question": "How do you organize a larger FastAPI application across multiple files?",
+    "expected_facts": [
+      "use APIRouter",
+      "include the router in the main app with include_router"
+    ]
+  },
+  {
+    "id": "q9",
+    "type": "easy",
+    "question": "What underlying technology gives FastAPI its asynchronous performance?",
+    "expected_facts": [
+      "built on Starlette",
+      "supports async/await and is ASGI-based"
+    ]
+  },
+  {
+    "id": "q10",
+    "type": "easy",
+    "question": "How do you implement a WebSocket endpoint in FastAPI?",
+    "expected_facts": [
+      "use the @app.websocket decorator",
+      "use a WebSocket parameter to send/receive messages"
+    ]
+  },
+  {
+    "id": "q11",
+    "type": "easy",
+    "question": "What ASGI server does the FastAPI documentation commonly reference for running an app?",
+    "expected_facts": [
+      "Uvicorn"
+    ]
+  },
+  {
+    "id": "q12",
+    "type": "easy",
+    "question": "How do you connect a FastAPI application to a SQL database?",
+    "expected_facts": [
+      "use an ORM/library such as SQLModel or SQLAlchemy",
+      "use a dependency to provide a database session per request"
+    ]
+  },
+  {
+    "id": "q13",
+    "type": "easy",
+    "question": "How does FastAPI implement OAuth2 password flow authentication with JWT tokens?",
+    "expected_facts": [
+      "uses OAuth2PasswordBearer / OAuth2PasswordRequestForm",
+      "issues and verifies a signed JWT access token"
+    ]
+  },
+  {
+    "id": "q14",
+    "type": "easy",
+    "question": "How do you handle and customize errors in FastAPI?",
+    "expected_facts": [
+      "raise HTTPException with a status code and detail",
+      "custom exception handlers can be registered"
+    ]
+  },
+  {
+    "id": "q15",
+    "type": "multihop",
+    "question": "If a path operation requires an OAuth2-authenticated user (via a dependency) AND accepts a JSON request body, how do the dependency and the request body parameters work together in the same function signature?",
+    "expected_facts": [
+      "the dependency (e.g. Depends(get_current_user)) is declared as one function parameter",
+      "the Pydantic model for the body is declared as another type-annotated parameter",
+      "FastAPI resolves both independently before calling the function"
+    ]
+  },
+  {
+    "id": "q16",
+    "type": "multihop",
+    "question": "How do middleware and background tasks each fit into the request/response lifecycle of a FastAPI app, and how do they differ?",
+    "expected_facts": [
+      "middleware wraps every request/response and can run code before and after the endpoint",
+      "background tasks run after the response has already been sent to the client",
+      "CORS is implemented as a middleware"
+    ]
+  },
+  {
+    "id": "q17",
+    "type": "multihop",
+    "question": "According to FastAPI's design history and its comparison to alternative frameworks, how does its use of Python type hints connect to both automatic validation and its async performance claims in benchmarks?",
+    "expected_facts": [
+      "type hints (via Pydantic) are reused for both data validation and automatic docs generation",
+      "FastAPI was designed after evaluating alternative frameworks that lacked this combination",
+      "the async/Starlette foundation is what benchmark comparisons attribute its performance to, separate from the validation layer"
+    ]
+  },
+  {
+    "id": "q18",
+    "type": "multihop",
+    "question": "In a larger application split across routers, how would you apply a shared OAuth2 authentication dependency to every route in one router?",
+    "expected_facts": [
+      "APIRouter accepts a dependencies parameter",
+      "passing Depends(...) there applies it to all path operations in that router"
+    ]
+  },
+  {
+    "id": "q19",
+    "type": "unanswerable",
+    "question": "How do you configure FastAPI's built-in rate-limiting middleware to throttle requests per API key?",
+    "expected_facts": [
+      "FastAPI has no built-in rate-limiting feature; this would require a third-party library"
+    ]
+  },
+  {
+    "id": "q20",
+    "type": "unanswerable",
+    "question": "What is the exact syntax for defining a native GraphQL schema in FastAPI without any third-party library?",
+    "expected_facts": [
+      "FastAPI does not have native built-in GraphQL support"
+    ]
+  }
+]

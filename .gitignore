@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+data/raw/
+data/qdrant_local/
+data/bm25_index.pkl
+*.egg-info/
+.pytest_cache/
+eval/results_checkpoint.json
