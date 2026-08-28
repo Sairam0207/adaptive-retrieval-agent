@@ -4,6 +4,7 @@ fallback to a secondary model when the primary's *daily* quota is exhausted
 (retrying that in place would be pointless — it won't reset for hours).
 Used by every node, the naive baseline, and the eval judge, instead of each
 creating its own client and repeating this logic."""
+import logging
 import re
 import time
 
@@ -12,6 +13,8 @@ from google import genai
 from google.genai import errors, types
 
 from src.config import settings
+
+logger = logging.getLogger(__name__)
 
 client = genai.Client(
     api_key=settings.google_api_key,
@@ -84,10 +87,10 @@ def generate(
         if fallback_model is None or fallback_model == model:
             raise
         reason = "server overload" if isinstance(exc, errors.ServerError) else "network error"
-        print(f"[llm_client] {model} exhausted retries ({reason}), falling back to {fallback_model}")
+        logger.warning("%s exhausted retries (%s), falling back to %s", model, reason, fallback_model)
         return _generate_with_retry(fallback_model, contents, config)
     except errors.ClientError as exc:
         if exc.code == 429 and fallback_model and fallback_model != model:
-            print(f"[llm_client] {model} quota exhausted, falling back to {fallback_model}")
+            logger.warning("%s quota exhausted, falling back to %s", model, fallback_model)
             return _generate_with_retry(fallback_model, contents, config)
         raise

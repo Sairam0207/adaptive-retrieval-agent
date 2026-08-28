@@ -1,0 +1,11 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.env
+data/
+.pytest_cache/
+eval/results_checkpoint.json
+tests/
+README.md

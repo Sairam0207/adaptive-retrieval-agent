@@ -1,3 +1,5 @@
+[![CI](https://github.com/Sairam0207/RAG-Proj/actions/workflows/ci.yml/badge.svg)](https://github.com/Sairam0207/RAG-Proj/actions/workflows/ci.yml)
+
 # Adaptive Retrieval Agent (ARA)
 
 A RAG system that grades its own retrieval before answering, self-corrects
@@ -39,6 +41,9 @@ cp .env.example .env            # then set GOOGLE_API_KEY (free tier: https://ai
 No Docker or external services required by default — Qdrant runs embedded
 (on-disk), embeddings/reranking run locally via sentence-transformers, and
 observability falls back to console logging if Langfuse keys aren't set.
+For full nested traces (retrieve/grade/reformulate/generate spans per query),
+create a free project at https://cloud.langfuse.com and set
+`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST` in `.env`.
 
 ## Ingest the corpus
 
@@ -70,7 +75,28 @@ uvicorn src.api.main:app --reload
 ```
 
 `POST /query {"question": "..."}` returns the answer plus the full
-retrieve/grade/correct trace.
+retrieve/grade/correct trace. A minimal chat UI is served at `/`.
+
+Set `API_KEY` in `.env` to require an `X-API-Key` header on `/query` — left
+blank by default so local dev needs no extra setup, but **must** be set
+before deploying anywhere publicly reachable (an open endpoint is an open
+invitation to burn through your Gemini quota). The bundled UI prompts for the
+key once and remembers it in the browser's local storage.
+
+## Run with Docker
+
+```bash
+docker build -t ara .
+docker run -p 8000:8000 -e GOOGLE_API_KEY=... -e API_KEY=... ara
+```
+
+The corpus is fetched, chunked, embedded, and indexed **during the image
+build**, not at container startup — so the container starts instantly and
+needs no network access beyond the Gemini API at runtime. Pass
+`LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` / `LANGFUSE_HOST` as additional
+`-e` flags for full tracing; omit them and it falls back to console logs.
+Secrets are injected as environment variables at deploy time (via your
+platform's secrets manager) — `.env` is never copied into the image.
 
 ## Run the MCP server
 
@@ -90,9 +116,37 @@ python -m eval.run_eval
 Runs the naive baseline and the corrective agent against `eval/golden_dataset.json`
 (20 questions: easy, multi-hop, and deliberately unanswerable), scores both
 with an LLM judge (fact coverage, faithfulness, hallucination), and prints a
-comparison. The key number to watch: hallucination rate on the unanswerable
-subset — naive RAG tends to fabricate answers there; the corrective agent
-should abstain instead.
+comparison.
+
+### Results (n=20, gemini-flash-lite-latest as judge)
+
+|                          | naive baseline | corrective agent |
+|--------------------------|:--------------:|:-----------------:|
+| fact coverage (answerable, n=18) | 0.630 | 0.648 |
+| faithfulness (1-5)       | 5.0            | 5.0                |
+| hallucination rate       | 0%             | 0%                 |
+| correct abstention on unanswerable (n=2) | 0/2 | 2/2 |
+
+Naive RAG and the corrective agent are statistically tied on questions the
+corpus can actually answer. The difference shows up on the 2 deliberately
+unanswerable questions: naive RAG confidently states a plausible-sounding
+answer anyway (e.g. asserting a specific rate-limiting behavior FastAPI
+doesn't have), while the corrective agent grades its retrieved context as
+insufficient and abstains instead of guessing.
+
+**A note on the metric itself:** naive's answers to the unanswerable
+questions score *well* on raw fact-coverage, because the judge only checks
+whether the answer states the expected fact — not whether that fact is
+actually grounded in the retrieved context. Naive gets there by falling back
+on the LLM's own pretrained knowledge, not the corpus. That's a real failure
+mode a fact-coverage-only metric rewards and a groundedness-blind eval would
+miss — which is why this report scores hallucination/abstention separately
+for the unanswerable subset instead of blending it into one average.
+
+The agent isn't free: it retries up to 2x before abstaining, and on this
+run it abstained on 4 of the 18 genuinely answerable questions too (an
+over-conservative tradeoff from the current grading prompt, not something
+this eval currently tunes for).
 
 ## Tests
 

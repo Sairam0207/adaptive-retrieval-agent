@@ -6,6 +6,10 @@ class Settings(BaseSettings):
 
     google_api_key: str = ""
 
+    # Auth for the FastAPI /query endpoint. Blank = open (local dev only).
+    # Set this before deploying anywhere publicly reachable.
+    api_key: str = ""
+
     grader_model: str = "gemini-flash-lite-latest"
     generator_model: str = "gemini-flash-latest"
 

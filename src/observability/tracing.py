@@ -3,9 +3,12 @@ credentials are configured (auto-nests spans within one trace per query via
 contextvars); otherwise degrades to console timing logs so the pipeline
 always runs without requiring an external account."""
 import functools
+import logging
 import time
 
 from src.config import settings
+
+logger = logging.getLogger(__name__)
 
 _langfuse_enabled = bool(settings.langfuse_public_key and settings.langfuse_secret_key)
 
@@ -34,7 +37,7 @@ def traced(name: str):
             start = time.perf_counter()
             result = langfuse_wrapped(*args, **kwargs)
             elapsed_ms = round((time.perf_counter() - start) * 1000, 1)
-            print(f"[trace] {name} ({elapsed_ms}ms)")
+            logger.info("%s (%sms)", name, elapsed_ms)
             return result
 
         return inner
