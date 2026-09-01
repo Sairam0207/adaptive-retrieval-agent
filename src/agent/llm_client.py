@@ -16,10 +16,26 @@ from src.config import settings
 
 logger = logging.getLogger(__name__)
 
-client = genai.Client(
-    api_key=settings.google_api_key,
-    http_options=types.HttpOptions(timeout=30_000),
-)
+# Built lazily, like get_qdrant_client/get_embedder/get_reranker: constructing
+# the client eagerly at import time makes the whole package unimportable
+# without a live API key, which broke CI (pytest can't even collect the API
+# tests) and any tooling that just wants to introspect the graph.
+_client: genai.Client | None = None
+
+
+def get_client() -> genai.Client:
+    global _client
+    if _client is None:
+        if not settings.google_api_key:
+            raise RuntimeError(
+                "GOOGLE_API_KEY is not set. Copy .env.example to .env and set it "
+                "(free tier: https://aistudio.google.com/apikey)."
+            )
+        _client = genai.Client(
+            api_key=settings.google_api_key,
+            http_options=types.HttpOptions(timeout=30_000),
+        )
+    return _client
 
 _MAX_ATTEMPTS = 4
 _BASE_DELAY_SECONDS = 3.0
@@ -55,7 +71,9 @@ def _generate_with_retry(model: str, contents: str, config: types.GenerateConten
     for attempt in range(_MAX_ATTEMPTS):
         try:
             _throttle(model)
-            return client.models.generate_content(model=model, contents=contents, config=config)
+            return get_client().models.generate_content(
+                model=model, contents=contents, config=config
+            )
         except errors.ServerError as exc:
             last_exc = exc
             if attempt < _MAX_ATTEMPTS - 1:
