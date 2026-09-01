@@ -1,0 +1,15 @@
+# Eval-only dependencies. Deliberately NOT in requirements.txt: ragas pulls in
+# datasets, pandas, pyarrow and the openai client, none of which the served
+# app needs. Keeping them out holds the Docker image and CI install lean.
+-r requirements.txt
+
+ragas==0.4.3
+langchain-google-genai==4.3.7
+
+# Pinned below 0.4 on purpose. ragas 0.4.3 does a hard
+# `from langchain_community.chat_models.vertexai import ChatVertexAI` in
+# ragas/llms/base.py, and langchain-community 0.4.x (now sunset) removed that
+# module, so `import ragas` fails outright on 0.4.x. 0.3.31 is the newest
+# release that still satisfies it without dragging langchain-core back below
+# the version langgraph 1.2.11 needs.
+langchain-community==0.3.31

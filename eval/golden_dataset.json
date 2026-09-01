@@ -166,6 +166,7 @@
   {
     "id": "q19",
     "type": "unanswerable",
+    "subtype": "nonexistent_feature",
     "question": "How do you configure FastAPI's built-in rate-limiting middleware to throttle requests per API key?",
     "expected_facts": [
       "FastAPI has no built-in rate-limiting feature; this would require a third-party library"
@@ -174,9 +175,82 @@
   {
     "id": "q20",
     "type": "unanswerable",
+    "subtype": "nonexistent_feature",
     "question": "What is the exact syntax for defining a native GraphQL schema in FastAPI without any third-party library?",
     "expected_facts": [
       "FastAPI does not have native built-in GraphQL support"
+    ]
+  },
+  {
+    "id": "q21",
+    "type": "unanswerable",
+    "subtype": "nonexistent_feature",
+    "question": "How do you define models and run schema migrations with FastAPI's built-in ORM?",
+    "expected_facts": [
+      "FastAPI has no built-in ORM or migration system; persistence is left to third-party libraries such as SQLAlchemy or SQLModel"
+    ]
+  },
+  {
+    "id": "q22",
+    "type": "unanswerable",
+    "subtype": "nonexistent_feature",
+    "question": "Which decorator does FastAPI provide to cache a path operation's response in memory, and how do you set its TTL?",
+    "expected_facts": [
+      "FastAPI provides no built-in response-caching decorator or TTL setting"
+    ]
+  },
+  {
+    "id": "q23",
+    "type": "unanswerable",
+    "subtype": "nonexistent_feature",
+    "question": "How do you enable FastAPI's built-in admin dashboard for CRUD management of your models?",
+    "expected_facts": [
+      "FastAPI ships no built-in admin dashboard; it is not a batteries-included framework like Django"
+    ]
+  },
+  {
+    "id": "q24",
+    "type": "unanswerable",
+    "subtype": "nonexistent_feature",
+    "question": "How do you register a recurring cron job with FastAPI's built-in task scheduler?",
+    "expected_facts": [
+      "FastAPI has no built-in scheduler or cron support; BackgroundTasks runs work once after a response, it does not schedule recurring jobs"
+    ]
+  },
+  {
+    "id": "q25",
+    "type": "unanswerable",
+    "subtype": "nonexistent_feature",
+    "question": "What FastAPI setting caps the maximum accepted request body size, and what is its default value?",
+    "expected_facts": [
+      "FastAPI exposes no request body size limit setting; enforcing one is the job of the ASGI server or a reverse proxy in front of it"
+    ]
+  },
+  {
+    "id": "q26",
+    "type": "unanswerable",
+    "subtype": "outside_corpus",
+    "question": "How do you serve a directory of static files such as CSS and images from a FastAPI application?",
+    "expected_facts": [
+      "you mount a StaticFiles instance on a path, e.g. app.mount('/static', StaticFiles(directory='static'))"
+    ]
+  },
+  {
+    "id": "q27",
+    "type": "unanswerable",
+    "subtype": "outside_corpus",
+    "question": "How do you stream a large file back to the client from a FastAPI path operation instead of loading it into memory?",
+    "expected_facts": [
+      "you return a StreamingResponse wrapping a generator or file-like object, or a FileResponse for a file on disk"
+    ]
+  },
+  {
+    "id": "q28",
+    "type": "unanswerable",
+    "subtype": "outside_corpus",
+    "question": "How do you run setup and teardown code once at FastAPI application startup and shutdown?",
+    "expected_facts": [
+      "you pass an async context manager to the app's lifespan parameter, yielding between the startup and shutdown halves"
     ]
   }
 ]

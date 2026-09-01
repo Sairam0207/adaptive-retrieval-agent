@@ -9,3 +9,6 @@ data/bm25_index.pkl
 *.egg-info/
 .pytest_cache/
 eval/results_checkpoint.json
+
+eval/ragas_samples.json
+eval/ragas_report.json

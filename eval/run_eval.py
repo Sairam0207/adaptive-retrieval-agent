@@ -79,13 +79,27 @@ def run() -> None:
 
         naive_result = naive_answer(item["question"])
         naive_score = judge(item["question"], item["expected_facts"], naive_result["answer"])
-        results["naive"].append({**naive_score, "type": item["type"], "id": item["id"]})
+        results["naive"].append({
+            **naive_score,
+            "type": item["type"],
+            "subtype": item.get("subtype"),
+            "id": item["id"],
+            "answer": naive_result["answer"],
+            "contexts": naive_result["contexts"],
+        })
 
         agent_result = ask(item["question"])
         agent_score = judge(item["question"], item["expected_facts"], agent_result["answer"])
         agent_score["retries_used"] = agent_result["retry_count"]
         agent_score["abstained"] = agent_result["abstained"]
-        results["agent"].append({**agent_score, "type": item["type"], "id": item["id"]})
+        results["agent"].append({
+            **agent_score,
+            "type": item["type"],
+            "subtype": item.get("subtype"),
+            "id": item["id"],
+            "answer": agent_result["answer"],
+            "contexts": [c.text for c in agent_result.get("retrieved_chunks", [])],
+        })
 
         _save_checkpoint(results)
 
@@ -121,6 +135,22 @@ def _report(results: dict) -> None:
             halluc_on_unanswerable = sum(1 for r in unanswerable if r["hallucinated"])
             print(f"[{system_name}] unanswerable questions (n={len(unanswerable)})")
             print(f"  hallucinated (fabricated an unsupported claim): {halluc_on_unanswerable}/{len(unanswerable)}")
+            # Two distinct flavors of "unanswerable", and they fail differently.
+            # nonexistent_feature: the answer does not exist anywhere, so any
+            #   confident answer is a fabrication.
+            # outside_corpus: the answer exists in the wider world but not in
+            #   the indexed corpus, so a confident answer is ungrounded even
+            #   when it happens to be factually true. Only abstention counts
+            #   as correct here; the hallucination flag alone will miss it.
+            for sub in ("nonexistent_feature", "outside_corpus"):
+                rows = [r for r in unanswerable if r.get("subtype") == sub]
+                if not rows:
+                    continue
+                halluc = sum(1 for r in rows if r["hallucinated"])
+                line = f"  [{sub}] n={len(rows)}, hallucinated {halluc}/{len(rows)}"
+                if any("abstained" in r for r in rows):
+                    line += f", abstained {sum(1 for r in rows if r.get('abstained'))}/{len(rows)}"
+                print(line)
 
     agent_retries = [r["retries_used"] for r in results["agent"]]
     agent_abstains = sum(1 for r in results["agent"] if r["abstained"])
